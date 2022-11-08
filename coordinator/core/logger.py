@@ -1,3 +1,4 @@
+"""Module for logger configuration."""
 import os
 import logging
 import logging.handlers
@@ -12,7 +13,7 @@ logger = logging.getLogger("tinycell_test-coordinator")
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter(LOG_FORMAT)
 log_handler = logging.handlers.TimedRotatingFileHandler(
-    filename=f"LOG_PATH/coordinator-log", when="midnight", backupCount=6
+    filename=f"{LOG_PATH}/coordinator-log", when="midnight", backupCount=6
 )
 
 log_handler.setFormatter(formatter)
