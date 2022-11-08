@@ -7,6 +7,7 @@ from .logger import logger
 from .yamlio import read_yaml, write_yaml
 
 config = {}
+device_list = []
 
 load_dotenv()
 

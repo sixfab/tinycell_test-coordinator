@@ -8,3 +8,21 @@ class Device:
         self.name = name
         self.port = port
         self.availibility = availibility
+
+    def __str__(self) -> str:
+        return (
+            f"\n"
+            f"Name: {self.name}, "
+            f"Port: {self.port}, "
+            f"Availibility: {self.availibility}"
+            f"\n"
+        )
+
+    def __repr__(self) -> str:
+        return (
+            f"\n"
+            f"Name: {self.name}, "
+            f"Port: {self.port}, "
+            f"Availibility: {self.availibility}"
+            f"\n"
+        )

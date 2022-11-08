@@ -4,6 +4,7 @@ import threading
 from core.config import config
 from core.slack import get_slack_socket_mode_handler
 from core.git import clone_repo
+from core.serialport import update_device_list, is_device_list_changed
 
 logger = config["logger"]
 logger.info("Coordinator started")
@@ -17,7 +18,10 @@ def source_manager():
     clone_repo()
 
     while True:
-        pass
+        devices = update_device_list()
+        if is_device_list_changed():
+            print(devices)
+        threading.Event().wait(5)
 
 
 if __name__ == "__main__":
