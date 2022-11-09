@@ -11,18 +11,18 @@ class Device:
 
     def __str__(self) -> str:
         return (
-            f"\n"
+            f"\nDevice("
             f"Name: {self.name}, "
             f"Port: {self.port}, "
             f"Availibility: {self.availibility}"
-            f"\n"
+            f")\n"
         )
 
     def __repr__(self) -> str:
         return (
-            f"\n"
+            f"\nDevice("
             f"Name: {self.name}, "
             f"Port: {self.port}, "
             f"Availibility: {self.availibility}"
-            f"\n"
+            f")\n"
         )

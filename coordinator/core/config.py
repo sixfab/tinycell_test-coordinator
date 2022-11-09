@@ -8,6 +8,7 @@ from .yamlio import read_yaml, write_yaml
 
 config = {}
 device_list = []
+test_proccess_list = []
 
 load_dotenv()
 
