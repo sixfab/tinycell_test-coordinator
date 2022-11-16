@@ -15,13 +15,10 @@ load_dotenv()
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.environ.get("SLACK_APP_TOKEN")
 
-
 TEMP_PATH = os.path.expanduser("~") + "/.tinycell_test-coordinator"
 FILE_DATABASE_PATH = f"{TEMP_PATH}/database.yaml"
 GIT_REPO_PATH = f"{TEMP_PATH}/test-process"
 
-if not os.path.exists(TEMP_PATH):
-    os.mkdir(TEMP_PATH)
 
 if not os.path.exists(FILE_DATABASE_PATH):
     logger.debug("Creating database file.")
