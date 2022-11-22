@@ -8,7 +8,7 @@ from .yamlio import read_yaml, write_yaml
 
 config = {}
 device_list = []
-test_proccess_list = []
+test_process_list = []
 
 load_dotenv()
 
@@ -18,6 +18,7 @@ SLACK_APP_TOKEN = os.environ.get("SLACK_APP_TOKEN")
 TEMP_PATH = os.path.expanduser("~") + "/.tinycell_test-coordinator"
 FILE_DATABASE_PATH = f"{TEMP_PATH}/database.yaml"
 GIT_REPO_PATH = f"{TEMP_PATH}/test-process"
+EXECUTABLE_PATH = f"{TEMP_PATH}/test-process/testprocess"
 
 
 if not os.path.exists(FILE_DATABASE_PATH):

@@ -35,24 +35,22 @@ def handle_message_events(body):
         url, headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}"}, timeout=10
     )
 
-    print(url)  # TODO: debug purposes code
-
     if response.status_code == 200:
         logger.info("Yaml file downloaded successfully")
         yaml = load_yaml(response.text)
 
-        print(yaml)  # TODO: debug purposes code
-
         try:
             check_request(yaml)
         except Exception as error:
-            logger.error(error)
+            logger.error(f"check_request -> {error}")
 
             # send error message to tinycell-test channel
             web_client.chat_postMessage(
                 channel="#tinycell-test",
                 text=f"Error: {error}",
             )
+        else:
+            logger.info("Test request processed successfully")
     else:
         raise Exception("Failed to download yaml file from slack!")
 
