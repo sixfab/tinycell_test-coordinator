@@ -1,6 +1,9 @@
 """Module for holding test process attributes and methods."""
+import os
+import signal
 import threading
 import subprocess
+from dataclasses import dataclass
 from .config import config, EXECUTABLE_PATH
 
 logger = config["logger"]
@@ -8,6 +11,16 @@ logger = config["logger"]
 
 class TestProcess:
     """Class for holding test process attributes and methods."""
+
+    @dataclass
+    class Status:
+        """Class for holding test process status"""
+
+        IDLE: str = "idle"
+        RUNNING: str = "running"
+        FINISHED: str = "finished"
+        TERMINATED: str = "terminated"
+        KILLED: str = "killed"
 
     process_id = 0
 
@@ -19,7 +32,7 @@ class TestProcess:
         script_name: str,
         repeat: int,
         interval: int,
-        status: str = "idle",
+        status: str = Status.IDLE,
     ) -> None:
         self.request_id = request_id
         self.device_name = device_name
@@ -45,6 +58,20 @@ class TestProcess:
     def create(self) -> None:
         """Create a new test process."""
 
+        def on_exit(process) -> None:
+            """After a test process ends, update the status of the test process."""
+            logger.info(
+                f"{self.process_id} on {self.device_port} is waiting for exit."
+            )
+            process.wait()
+            if self.status == self.Status.RUNNING:
+                self.status = self.Status.FINISHED
+                logger.info(f"{self.process_id} is finished.")
+            else:
+                logger.info(
+                    f"{self.process_id} is {self.status} by another request."
+                )
+
         command = f"python3 run.py -t {self.script_name} -p {self.device_port}"
         process = subprocess.Popen(
             command,
@@ -54,24 +81,40 @@ class TestProcess:
             shell=True,
         )
         self.process_id = process.pid
-        self.status = "running"
+        self.status = self.Status.RUNNING
         logger.info(f"{self.process_id} is created.")
 
-        threading.Thread(target=self.on_exit, args=(process,)).start()
+        threading.Thread(target=on_exit, args=(process,)).start()
         process.communicate()
 
-    def on_exit(self, process) -> None:
-        """After a test process ends, update the status of the test process."""
-        logger.info(
-            f"{self.process_id} on {self.device_port} is waiting for exit."
-        )
-        process.wait()
-        self.status = "finished"
-        logger.info(f"{self.process_id} is finished.")
+    def terminate(self) -> None:
+        """Terminate a test process gracefully."""
+
+        def terminate_process() -> None:
+            """Terminate a process by its process id."""
+            try:
+                os.kill(self.process_id, signal.SIGTERM)
+            except ProcessLookupError:
+                ...
+            else:
+                self.status = self.Status.TERMINATED
+                logger.info(f"{self.process_id} is terminated.")
+
+        logger.info(f"{self.process_id} is terminating...")
+        threading.Thread(target=terminate_process).start()
 
     def kill(self) -> None:
         """Kill a test process."""
-        # TODO: Kill a test process here
-        # TODO: Remove the test process from test_proccess_list
-        # TODO: Update the status of the test process to "killed"
-        print(f"{self.process_id} is killed.")
+
+        def kill_process() -> None:
+            """Kill a process by its process id."""
+            try:
+                os.kill(self.process_id, signal.SIGKILL)
+            except ProcessLookupError:
+                ...
+            else:
+                self.status = self.Status.KILLED
+                logger.info(f"{self.process_id} is killed.")
+
+        logger.info(f"{self.process_id} is killing...")
+        threading.Thread(target=kill_process).start()

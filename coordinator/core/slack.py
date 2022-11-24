@@ -13,6 +13,7 @@ logger = config["logger"]
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.environ.get("SLACK_APP_TOKEN")
 
+
 # Initializes your app with your bot token and socket mode handler
 app = App(token=SLACK_BOT_TOKEN)
 web_client = app.client
@@ -40,24 +41,22 @@ def handle_message_events(body):
         yaml = load_yaml(response.text)
 
         try:
-            check_request(yaml)
+            result = check_request(yaml)
         except Exception as error:
             logger.error(f"check_request -> {error}")
 
-            # send error message to tinycell-test channel
             web_client.chat_postMessage(
                 channel="#tinycell-test",
                 text=f"Error: {error}",
             )
         else:
             logger.info("Test request processed successfully")
+            web_client.chat_postMessage(
+                channel="#tinycell-test", text=f"Info: {result}"
+            )
+
     else:
         raise Exception("Failed to download yaml file from slack!")
-
-
-def get_slack_client():
-    """Get slack client"""
-    return app.client
 
 
 def get_slack_socket_mode_handler():
