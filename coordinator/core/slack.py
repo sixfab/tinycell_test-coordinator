@@ -14,6 +14,8 @@ logger = config["logger"]
 
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.environ.get("SLACK_APP_TOKEN")
+SLACK_COMMAND_CHANNEL = os.environ.get("SLACK_COMMAND_CHANNEL")
+SLACK_REPORT_CHANNEL = os.environ.get("SLACK_REPORT_CHANNEL")
 
 
 # Initializes your app with your bot token and socket mode handler
@@ -24,9 +26,7 @@ web_client = app.client
 @app.message("hello")
 def message_hello(message, say):
     """Message hello handler"""
-    say(
-        text=f"Hey there <@{message['user']}>!",
-    )
+    say(text=f"Hey there <@{message['user']}>!")
 
 
 @app.message("device")
@@ -38,9 +38,7 @@ def message_devices(message, say):
     for device in device_list:
         response += f"Name: {device.name}\t" f"Port: {device.port}\n\n"
 
-    say(
-        text=response,
-    )
+    say(text=response)
 
 
 @app.message("test process")
@@ -63,10 +61,7 @@ def message_test_process(message, say):
             f"Interval: {process.interval}\n"
             f"*********************************\n\n"
         )
-
-    say(
-        text=response,
-    )
+    say(text=response)
 
 
 @app.message("update repo")
@@ -77,16 +72,10 @@ def message_update_repo(message, say):
         update_repo()
     except Exception as error:
         logger(f"Error: {error}")
-
-        say(
-            text=f"Error: {error}",
-        )
+        say(text=f"Error: {error}")
     else:
         logger.info("test_process repo updated succesfully")
-
-        say(
-            text="Info: test_process repo updated succesfully",
-        )
+        say(text="Info: test_process repo updated succesfully")
 
 
 @app.event({"type": "message", "subtype": "file_share"})
@@ -104,17 +93,17 @@ def handle_message_events(body):
 
         try:
             result = check_request(yaml)
+
         except Exception as error:
             logger.error(f"check_request -> {error}")
-
             web_client.chat_postMessage(
-                channel="#tinycell-test",
-                text=f"Error: {error}",
+                channel=SLACK_COMMAND_CHANNEL, text=f"Error: {error}"
             )
+
         else:
             logger.info("Test request processed successfully")
             web_client.chat_postMessage(
-                channel="#tinycell-test", text=f"Info: {result}"
+                channel=SLACK_COMMAND_CHANNEL, text=f"Info: {result}"
             )
 
     else:
