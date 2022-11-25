@@ -20,7 +20,7 @@ TEMP_PATH = os.path.expanduser("~") + "/.tinycell_test-coordinator"
 
 # GIT CONFIGS
 GIT_REMOTE_LINK = "https://github.com/sixfab/tinycell_test-process"
-GIT_REPO_BRANCH = "feat/integration-with-coordinator"
+GIT_REPO_BRANCH = "dev"
 GIT_REPO_PATH = f"{TEMP_PATH}/test-process"
 
 EXECUTABLE_PATH = f"{TEMP_PATH}/test-process/testprocess"
