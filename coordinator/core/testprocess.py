@@ -1,5 +1,6 @@
 """Module for holding test process attributes and methods."""
 import os
+import time
 import signal
 import threading
 import subprocess
@@ -22,8 +23,6 @@ class TestProcess:
         TERMINATED: str = "terminated"
         KILLED: str = "killed"
 
-    process_id = 0
-
     def __init__(
         self,
         request_id: str,
@@ -33,6 +32,9 @@ class TestProcess:
         repeat: int,
         interval: int,
         status: str = Status.IDLE,
+        process_id: int = None,
+        start_time: float = 0,
+        end_time: float = 0,
     ) -> None:
         self.request_id = request_id
         self.device_name = device_name
@@ -41,6 +43,9 @@ class TestProcess:
         self.repeat = repeat
         self.interval = interval
         self.status = status
+        self.process_id = process_id
+        self.start_time = start_time
+        self.end_time = end_time
 
     def __str__(self) -> str:
         return (
@@ -66,6 +71,7 @@ class TestProcess:
             process.wait()
             if self.status == self.Status.RUNNING:
                 self.status = self.Status.FINISHED
+                self.end_time = time.time()
                 logger.info(f"{self.process_id} is finished.")
             else:
                 logger.info(
@@ -82,6 +88,7 @@ class TestProcess:
         )
         self.process_id = process.pid
         self.status = self.Status.RUNNING
+        self.start_time = time.time()
         logger.info(f"{self.process_id} is created.")
 
         threading.Thread(target=on_exit, args=(process,)).start()
@@ -98,6 +105,7 @@ class TestProcess:
                 ...
             else:
                 self.status = self.Status.TERMINATED
+                self.end_time = time.time()
                 logger.info(f"{self.process_id} is terminated.")
 
         logger.info(f"{self.process_id} is terminating...")
@@ -114,6 +122,7 @@ class TestProcess:
                 ...
             else:
                 self.status = self.Status.KILLED
+                self.end_time = time.time()
                 logger.info(f"{self.process_id} is killed.")
 
         logger.info(f"{self.process_id} is killing...")

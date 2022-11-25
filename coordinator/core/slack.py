@@ -7,6 +7,7 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from .config import config
 from .yamlio import load_yaml
 from .testrequest import check_request
+from .config import device_list, test_process_list
 
 logger = config["logger"]
 
@@ -24,6 +25,46 @@ def message_hello(message, say):
     """Message hello handler"""
     say(
         text=f"Hey there <@{message['user']}>!",
+    )
+
+
+@app.message("device")
+def message_devices(message, say):
+    """Message devices handler"""
+
+    response = "Devices:\n"
+
+    for device in device_list:
+        response += f"Name: {device.name}\t" f"Port: {device.port}\n\n"
+
+    say(
+        text=response,
+    )
+
+
+@app.message("test process")
+def message_test_process(message, say):
+    """Message test process handler"""
+    response = "Test Processes:\n"
+
+    for process in test_process_list:
+        response += (
+            f"*********************************\n"
+            f"Request ID: {process.request_id}\n"
+            f"Process ID: {process.process_id}\n"
+            f"Device Name: {process.device_name}\n"
+            f"Device Port: {process.device_port}\n"
+            f"Script Name: {process.script_name}\n"
+            f"Status: {process.status}\n"
+            f"Start Time: {process.start_time}\n"
+            f"End Time: {process.end_time}\n"
+            f"Repeat: {process.repeat}\n"
+            f"Interval: {process.interval}\n"
+            f"*********************************\n\n"
+        )
+
+    say(
+        text=response,
     )
 
 

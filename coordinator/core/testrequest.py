@@ -1,8 +1,39 @@
 """Module for processing test request from slack."""
 
 import time
-from .config import test_process_list, device_list
+from .yamlio import write_yaml
+from .config import (
+    config,
+    test_process_reloaded,
+    test_process_list,
+    device_list,
+    PROCESS_LIST_PATH,
+)
 from .testprocess import TestProcess
+
+old_test_process_list = []
+logger = config.get("logger")
+
+
+def reload_test_processes() -> None:
+    """Reload test processes from process_list.yaml."""
+
+    for process in test_process_reloaded:
+        test_process = TestProcess(
+            request_id=process.get("request_id"),
+            process_id=process.get("process_id"),
+            device_name=process.get("device_name"),
+            device_port=process.get("device_port"),
+            script_name=process.get("script_name"),
+            repeat=process.get("repeat"),
+            interval=process.get("interval"),
+            status=process.get("status"),
+            start_time=process.get("start_time"),
+            end_time=process.get("end_time"),
+        )
+        test_process_list.append(test_process)
+    test_process_reloaded.clear()
+    logger.info("Test processes are reloaded from file!")
 
 
 def tidy_up_process_list() -> None:
@@ -18,6 +49,21 @@ def tidy_up_process_list() -> None:
 
     for process in must_remove_list:
         test_process_list.remove(process)
+
+    if test_process_list != old_test_process_list:
+
+        dictionary_list = []
+        for process in test_process_list:
+            dictionary_list.append(vars(process))
+
+        write_yaml(
+            PROCESS_LIST_PATH,
+            {"process_list": dictionary_list},
+        )
+
+        old_test_process_list.clear()
+        old_test_process_list.extend(test_process_list)
+        logger.info("Test process list is updated!")
 
 
 def check_request(request: dict) -> None:

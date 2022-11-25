@@ -8,7 +8,7 @@ def read_yaml(file):
     """Read all items from yaml file."""
     with open(file, encoding="utf-8") as file_object:
         data = yaml.safe_load(file_object)
-        return data or {}
+    return data
 
 
 def write_yaml(file, items, clear=True):
@@ -23,4 +23,4 @@ def write_yaml(file, items, clear=True):
 
 def load_yaml(text):
     """Load yaml from text."""
-    return yaml.safe_load(text) or {}
+    return yaml.safe_load(text)
