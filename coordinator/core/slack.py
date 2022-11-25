@@ -7,6 +7,7 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from .config import config
 from .yamlio import load_yaml
 from .testrequest import check_request
+from .git import update_repo
 from .config import device_list, test_process_list
 
 logger = config["logger"]
@@ -66,6 +67,26 @@ def message_test_process(message, say):
     say(
         text=response,
     )
+
+
+@app.message("update repo")
+def message_update_repo(message, say):
+    """Message update repo handler"""
+
+    try:
+        update_repo()
+    except Exception as error:
+        logger(f"Error: {error}")
+
+        say(
+            text=f"Error: {error}",
+        )
+    else:
+        logger.info("test_process repo updated succesfully")
+
+        say(
+            text="Info: test_process repo updated succesfully",
+        )
 
 
 @app.event({"type": "message", "subtype": "file_share"})
