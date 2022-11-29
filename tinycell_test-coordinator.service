@@ -1,0 +1,8 @@
+Description=Tinycell Test Coordinator
+[Service]
+User=sixfab
+Restart=always
+Group=sudo
+RestartSec=3
+WorkingDirectory=/opt/sixfab/tinycell/tinycell_test-coordinator/coordinator
+ExecStart={{ venv }}/bin/python3 coordinator.py
