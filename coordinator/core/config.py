@@ -19,7 +19,10 @@ SLACK_REPORT_CHANNEL = os.environ.get("SLACK_REPORT_CHANNEL")
 TEMP_PATH = os.path.expanduser("~") + "/.tinycell_test-coordinator"
 
 # GIT CONFIGS
-GIT_REMOTE_LINK = "https://github.com/sixfab/tinycell_test-process"
+GIT_REMOTE_LINK = (
+    os.environ.get("TEST_PROCESS_REPO") \
+        or "git@github.com:sixfab/tinycell_test-process.git"
+)
 GIT_REPO_BRANCH = "dev"
 GIT_REPO_PATH = f"{TEMP_PATH}/test-process"
 

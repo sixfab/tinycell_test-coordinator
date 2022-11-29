@@ -5,4 +5,4 @@ Restart=always
 Group=sudo
 RestartSec=3
 WorkingDirectory=/opt/sixfab/tinycell/tinycell_test-coordinator/coordinator
-ExecStart={{ venv }}/bin/python3 coordinator.py
+ExecStart=/opt/sixfab/tinycell/tinycell_test-process/venv/bin/python3 coordinator.py
