@@ -78,10 +78,9 @@ class TestProcess:
                     f"{self.process_id} is {self.status} by another request."
                 )
 
-        command = f"python3 run.py -t {self.script_name} -p {self.device_port}"
+        command = f"../bin/python {EXECUTABLE_PATH}/run.py -t {self.script_name} -p {self.device_port}"
         process = subprocess.Popen(
             command,
-            cwd=EXECUTABLE_PATH,
             start_new_session=True,  # to seperate from parent process group
             close_fds=True,
             shell=True,
