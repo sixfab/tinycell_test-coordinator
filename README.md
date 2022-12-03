@@ -58,6 +58,11 @@ SLACK_REPORT_CHANNEL="#tinycell-reports"
 ## Manual Installation
 By following these steps, you can configure the program to run on each boot.
 ```bash
+# Create a sixfab user.
+~$ sudo adduser --disabled-password --gecos "" sixfab &> /dev/null
+~$ echo "sixfab ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/sixfab_tinycell &> /dev/null
+~$ sudo usermod -a -G dialout sixfab
+
 # Clone repo to any directory.
 ~$ git clone https://github.com/sixfab/tinycell_test-coordinator.git
 
