@@ -1,8 +1,14 @@
-Description=Tinycell Test Coordinator
+[Unit]
+Description=Controls the automatized tests on Tinycell devices via Slack channel
+After=network-online.target multi-user.target
+
 [Service]
 User=sixfab
-Restart=always
 Group=sudo
+Restart=always
 RestartSec=3
 WorkingDirectory=/opt/sixfab/tinycell/tinycell_test-coordinator/coordinator
-ExecStart=/opt/sixfab/tinycell/tinycell_test-process/venv/bin/python3 coordinator.py
+ExecStart=/opt/sixfab/tinycell/tinycell_test-process/venv/bin/python /opt/sixfab/tinycell/tinycell_test-process/coordinator/coordinator.py
+
+[Install]
+WantedBy=multi-user.target
