@@ -19,7 +19,6 @@ def source_manager():
     logger.info("Source manager started.")
     # git repo
     clone_repo()
-    switch_desired_branch()
     update_repo()
 
     # test process
