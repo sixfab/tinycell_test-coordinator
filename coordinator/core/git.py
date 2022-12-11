@@ -41,12 +41,12 @@ def clone_repo() -> None:
             logger.info("Test process repo cloned.")
 
 
-def switch_desired_branch() -> None:
+def switch_desired_branch(branch: str = GIT_REPO_BRANCH) -> None:
     """Switch to desired branch"""
-    result = git_shell_command(f"git checkout {GIT_REPO_BRANCH}")
+    result = git_shell_command(f"git checkout {branch}")
 
     if result == 0:
-        logger.info(f"Switched to {GIT_REPO_BRANCH} branch.")
+        logger.info(f"Switched to {branch} branch.")
 
 
 def update_repo() -> None:
