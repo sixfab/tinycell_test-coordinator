@@ -7,7 +7,7 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from .config import config
 from .yamlio import load_yaml
 from .testrequest import check_request
-from .git import update_repo
+from .git import update_repo, switch_desired_branch
 from .config import device_list, test_process_list
 
 logger = config["logger"]
@@ -63,6 +63,18 @@ def message_test_process(message, say):
         )
     say(text=response)
 
+@app.message("update branch to")
+def message_update_branch(message, say):
+    """Message update branch handler"""
+    branch_name = message["text"].split(" ")[-1]
+    try:
+        switch_desired_branch(branch=branch_name)
+    except Exception as error:
+        logger(f"Error: {error}")
+        say(text=f"Error: {error}")
+    else:
+        logger.info("test_process branch updated succesfully to " + branch_name)
+        say(text="Info: test_process branch updated succesfully to " + branch_name)
 
 @app.message("update repo")
 def message_update_repo(message, say):
