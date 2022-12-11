@@ -1,87 +1,110 @@
-# tinycell_test-device-farm
-It is repo for testing multiple tinycell devices in predesigned scenarios.
+# Device Farm Service for Testing Tinycells
+The program is a Slack bot service which can be used to test multiple Tinycell devices in predesigned scenarios. It is suggested to connect the bot into two different channels which are used to control the devices and to monitor the test results status.
 
+### Bot Commands
+* `hello` - bot will reply with `Hey there @username!`.
+* `device` - bot will reply with connected device list.
+* `update repo` - bot will update the TestProcess repo from GitHub to retrive new test cases.
 
-# Prepration
+### Slack Configuration
+* Create a Slack bot with given manifest file and get your `APP_TOKEN` and `BOT_TOKEN`.
+* Add this app/bot to your Slack channels which you would like to interract with bot.
 
-## Slack api
-* Create a slack bot and get `app_token` and `bot_token`.
-* Add this bot to your slack channels which you would like to interract with bot.
+    ```yaml
+    display_information:
+    name: [SLACK_APP_NAME]
+    description: [SLACK_APP_DESCRIPTION]
+    background_color: "[SLACK_APP_BACKGROUND_COLOR_HEX]"
+    features:
+    bot_user:
+        display_name: [SLACK_BOT_NAME]
+        always_online: false
+    oauth_config:
+    scopes:
+        bot:
+        - chat:write
+        - files:read
+        - groups:history
+    settings:
+    event_subscriptions:
+        bot_events:
+        - file_change
+        - file_created
+        - message.groups
+    interactivity:
+        is_enabled: true
+    org_deploy_enabled: false
+    socket_mode_enabled: true
+    token_rotation_enabled: false
+    ```
 
-## Github
-* Authorize the host raspberry pi to access your github account.
+---
+<br>
 
-# Installation
-Downlaod install.sh and run it.
-`sudo bash ./install.sh`
-
-## Extra Steps for private repos
-Clone repo to path
-```
-git clone git@github.com:sixfab/tinycell_test-coordinator.git
-sudo mv tinycell_test-coordinator /opt/sixfab/tinycell/
-```
-
-Go to path
-
-`cd /opt/sixfab/tinycell/tinycell_test-coordinator`
-
-
-Create virtual environment and activate it
-
-`python3 -m venv venv`
-
-`source venv/bin/activate`
-
-
-Install requirements
-
-`pip3 install -r requirements.txt`
-
-
-Create .env file. .env must contain following variables
-
-```
+## Example Environment File
+A `.env` file is neccessary to run the program. It should be placed in the same directory with repo (`/opt/sixfab/tinycell/tinycell_test-coordinator`). The file should contain the following information.
+```bash
+# .env
 SLACK_BOT_TOKEN=xoxb-xxxxxxxxxxxx-xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxx
 SLACK_APP_TOKEN=xapp-x-xxxxxxxxxxxx-xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxx
 
-TEST_PROCESS_REPO=git@github.com:sixfab/tinycell_test-process.git
+TEST_PROCESS_REPO=https://github.com/sixfab/tinycell_test-process.git
 TEST_PROCESS_BRANCH=dev
 
 SLACK_COMMAND_CHANNEL="#tinycell-command"
 SLACK_REPORT_CHANNEL="#tinycell-reports"
 ```
 
-Create deploy key for test-process repo
+## Manual Installation
+By following these steps, you can configure the program to run on each boot.
+```bash
+# Create a sixfab user, give it the neccessary permissons.
+~$ sudo adduser --disabled-password --gecos "" sixfab &> /dev/null
+~$ echo "sixfab ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/sixfab_tinycell &> /dev/null
+~$ sudo usermod -a -G dialout sixfab
 
+# Clone repo to any directory.
+~$ git clone https://github.com/sixfab/tinycell_test-coordinator.git
+
+# Copy the program files into /opt/sixfab/tinycell directory.
+~$ sudo mkdir -p /opt/sixfab/tinycell
+~$ sudo mv tinycell_test-coordinator /opt/sixfab/tinycell/
+
+# Go to the program directory.
+~$ cd /opt/sixfab/tinycell/tinycell_test-coordinator
+
+# Create a virtual environment, activate it.
+~$ python3 -m venv venv    # OR "virtualenv ."
+~$ source venv/bin/activate
+
+# Install the required packages.
+(venv) ~$ pip install -r requirements.txt
+
+# Create a .env file and fill it with your Slack tokens.
+(venv) ~$ sudo vim .env
+
+# Install the systemd service file.
+(venv) ~$ sudo cp tinycell_test-coordinator.service /etc/systemd/system/
+# Give the service file the sixfab user permissions.
+(venv) ~$ sudo chown sixfab /etc/systemd/system/tinycell_test-coordinator.service
+
+# Reload the systemd daemon.
+(venv) ~$ sudo systemctl daemon-reload
+# Enable and start the service.
+(venv) ~$ sudo systemctl enable tinycell_test-coordinator.service
+(venv) ~$ sudo systemctl start tinycell_test-coordinator.service
 ```
-ssh-keygen -t ed25519 -C "your_email@example.com"
 
-eval "$(ssh-agent -s)"
-
-ssh-add ~/.ssh/id_ed25519
+## Debugging
+You can check the status of the service with the following command.
+```bash
+~$ sudo systemctl status tinycell_test-coordinator.service
 ```
 
-Copy public key to deploy key section of the repository. For instructions see [here](https://docs.github.com/en/developers/overview/managing-deploy-keys)
+You can debug the program with the following command.
+```bash
+~$ sudo journalctl -u tinycell_test-coordinator.service -f
 ```
-cat ~/.ssh/id_ed25519.pub
-```
-**Note: ** You may want to change the name of the key to something more meaningful.
-
-Install service and start it
-```
-sudo cp tinycell_test-coordinator.service /etc/systemd/system/tinycell_test-coordinator.service
-
-sudo chown sixfab /etc/systemd/system/tinycell_test-coordinator.service
-
-sudo systemctl daemon-reload
-
-sudo systemctl enable tinycell_test-coordinator.service
-
-sudo systemctl start tinycell_test-coordinator.service
-```
-
-
 
 
 
