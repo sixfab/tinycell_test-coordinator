@@ -66,7 +66,7 @@ def tidy_up_process_list() -> None:
         logger.info("Test process list is updated!")
 
 
-def check_request(request: dict) -> None:
+def check_request(request: dict):
     """Create and remove test_processes by getting request from slack."""
 
     is_valid_request = False
@@ -118,17 +118,16 @@ def check_request(request: dict) -> None:
                 ):
                     raise Exception("Target device is already in use!")
 
-            for _ in range(repeat):
-                test_process = TestProcess(
-                    request_id=request_id,
-                    device_name=device_name,
-                    device_port=device_port,
-                    script_name=script_name,
-                    repeat=1,
-                    interval=interval,
-                )
-                test_process_list.append(test_process)
-                test_process.create()
+            test_process = TestProcess(
+                request_id=request_id,
+                device_name=device_name,
+                device_port=device_port,
+                script_name=script_name,
+                repeat=1,
+                interval=interval,
+            )
+            test_process_list.append(test_process)
+            test_process.create()
             return f"Test process running on {device_name} is completed!"
 
         # request_type is "delete"

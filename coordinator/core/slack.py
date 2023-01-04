@@ -104,20 +104,27 @@ def handle_message_events(body):
         yaml = load_yaml(response.text)
 
         try:
-            result = check_request(yaml)
-
+            request_list = yaml["requests"]
         except Exception as error:
-            logger.error(f"check_request -> {error}")
+            logger.error(f"Error: {error}")
             web_client.chat_postMessage(
                 channel=SLACK_COMMAND_CHANNEL, text=f"Error: {error}"
             )
-
         else:
-            logger.info("Test request processed successfully")
-            web_client.chat_postMessage(
-                channel=SLACK_COMMAND_CHANNEL, text=f"Info: {result}"
-            )
-
+            for request in request_list:
+                print(request)
+                try:
+                    result = check_request(request)
+                except Exception as error:
+                    logger.error(f"Error: {error}")
+                    web_client.chat_postMessage(
+                        channel=SLACK_COMMAND_CHANNEL, text=f"Error: {error}"
+                    )
+                else:
+                    logger.info("Test request processed successfully")
+                    web_client.chat_postMessage(
+                        channel=SLACK_COMMAND_CHANNEL, text=f"Info: {result}"
+                    )
     else:
         raise Exception("Failed to download yaml file from slack!")
 
