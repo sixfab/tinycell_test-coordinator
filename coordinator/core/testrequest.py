@@ -27,6 +27,8 @@ def reload_test_processes() -> None:
             script_name=process.get("script_name"),
             repeat=process.get("repeat"),
             interval=process.get("interval"),
+            start_on=process.get("start_on"),
+            run_until=process.get("run_until"),
             status=process.get("status"),
             start_time=process.get("start_time"),
             end_time=process.get("end_time"),
@@ -41,7 +43,7 @@ def tidy_up_process_list() -> None:
     must_remove_list = []
     for process in test_process_list:
         if (
-            process.status == TestProcess.Status.FINISHED
+            process.status == TestProcess.Status.COMPLETED
             or process.status == TestProcess.Status.TERMINATED
             or process.status == TestProcess.Status.KILLED
         ):
@@ -79,8 +81,10 @@ def check_request(request: dict):
     device_name = request.get("device_name")
     device_port = request.get("device_port")
     script_name = request.get("script_name")
-    repeat = request.get("repeat")
-    interval = request.get("interval")
+    repeat = request.get("repeat", 0)
+    interval = request.get("interval", 0)
+    start_on = request.get("start_on", int(time.time()))
+    run_until = request.get("run_until", 0)
 
     # if device port is not specified, decide the port by device name
     if device_port is None:
@@ -90,11 +94,7 @@ def check_request(request: dict):
                 break
 
     # is it a valid request?
-    if (
-        (device_port or device_name)
-        and script_name
-        and request_type is not None
-    ):
+    if (device_port or device_name) and script_name and request_type is not None:
         is_valid_request = True
     else:
         raise Exception("Invalid request. Missing some required fields!")
@@ -112,10 +112,7 @@ def check_request(request: dict):
         if request_type == "create":
             # raise exception if the test device is already occupied
             for process in test_process_list:
-                if (
-                    process.device_name == device_name
-                    or process.device_port == device_port
-                ):
+                if process.device_name == device_name or process.device_port == device_port:
                     raise Exception("Target device is already in use!")
 
             test_process = TestProcess(
@@ -123,22 +120,21 @@ def check_request(request: dict):
                 device_name=device_name,
                 device_port=device_port,
                 script_name=script_name,
-                repeat=1,
+                repeat=repeat,
                 interval=interval,
+                start_on=start_on,
+                run_until=run_until,
             )
+            test_process.status = TestProcess.Status.WAITING
             test_process_list.append(test_process)
-            test_process.create()
-            return f"Test process running on {device_name} is completed!"
+            return f"Test process is added the process list. Request ID: {request_id}"
 
         # request_type is "delete"
         elif request_type == "delete":
             is_existed = False
 
             for process in test_process_list:
-                if (
-                    process.device_name == device_name
-                    or process.device_port == device_port
-                ):
+                if process.device_name == device_name or process.device_port == device_port:
                     is_existed = True
                     process.terminate()
                     break
@@ -146,19 +142,13 @@ def check_request(request: dict):
             if not is_existed:
                 raise Exception("Target device is not in use!")
             else:
-                return (
-                    f"Test process running on {device_name} "
-                    f"is terminated gracefully!"
-                )
+                return f"Test process running on {device_name} " f"is terminated gracefully!"
 
         # request_type is "force_delete"
         elif request_type == "force_delete":
             is_existed = False
             for process in test_process_list:
-                if (
-                    process.device_name == device_name
-                    or process.device_port == device_port
-                ):
+                if process.device_name == device_name or process.device_port == device_port:
                     is_existed = True
                     process.kill()
                     break
@@ -166,6 +156,36 @@ def check_request(request: dict):
             if not is_existed:
                 raise Exception("Target device is not in use!")
             else:
-                return (
-                    f"Test process running on {device_name} killed immediately!"
-                )
+                return f"Test process running on {device_name} killed immediately!"
+
+
+def manage_test_processes():
+    """Manage test processes."""
+
+    for process in test_process_list:
+        if process.status == TestProcess.Status.WAITING:
+            if process.start_on <= time.time():
+                process.create()
+
+        if process.status == TestProcess.Status.FINISHED:
+            # calculate the next start time
+            process.start_on = process.start_on + process.interval
+
+            # Recreate the process if run_until is not 0 and not reached
+            if process.run_until != 0 and process.run_until >= time.time():
+                run_until_case = True
+            else:
+                run_until_case = False
+
+            # Recreate the process if repeat is greater than 0 or run_until_case is True
+            if process.repeat > 0 or run_until_case:
+                process.repeat -= 1
+                process.status = TestProcess.Status.REPEATING
+            else:
+                process.status = TestProcess.Status.COMPLETED
+
+        if process.status == TestProcess.Status.REPEATING:
+            # Recreate the process if reached start_on time
+            if process.start_on <= time.time():
+                process.status = TestProcess.Status.FINISHED
+                process.create()

@@ -59,9 +59,12 @@ def message_test_process(message, say):
             f"End Time: {process.end_time}\n"
             f"Repeat: {process.repeat}\n"
             f"Interval: {process.interval}\n"
+            f"Start On: {process.start_on}\n"
+            f"Run Until: {process.run_until}\n"
             f"*********************************\n\n"
         )
     say(text=response)
+
 
 @app.message("update branch to")
 def message_update_branch(message, say):
@@ -75,6 +78,7 @@ def message_update_branch(message, say):
     else:
         logger.info("test_process branch updated succesfully to " + branch_name)
         say(text="Info: test_process branch updated succesfully to " + branch_name)
+
 
 @app.message("update repo")
 def message_update_repo(message, say):
@@ -95,9 +99,7 @@ def handle_message_events(body):
     """Handle file shared event"""
     url = body["event"]["files"][0]["url_private"]
 
-    response = requests.get(
-        url, headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}"}, timeout=10
-    )
+    response = requests.get(url, headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}"}, timeout=30)
 
     if response.status_code == 200:
         logger.info("Yaml file downloaded successfully")
@@ -107,9 +109,7 @@ def handle_message_events(body):
             request_list = yaml["requests"]
         except Exception as error:
             logger.error(f"Error: {error}")
-            web_client.chat_postMessage(
-                channel=SLACK_COMMAND_CHANNEL, text=f"Error: {error}"
-            )
+            web_client.chat_postMessage(channel=SLACK_COMMAND_CHANNEL, text=f"Error: {error}")
         else:
             for request in request_list:
                 print(request)
