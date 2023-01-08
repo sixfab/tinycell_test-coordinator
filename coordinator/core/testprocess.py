@@ -81,7 +81,10 @@ class TestProcess:
             else:
                 logger.info(f"{self.process_id} is {self.status} by another request.")
 
-        command = f"../venv/bin/python {EXECUTABLE_PATH}/run.py -t {self.script_name} -p {self.device_port}"
+        command = (
+            f"../venv/bin/python {EXECUTABLE_PATH}/run.py -t {self.script_name}"
+            f" -p {self.device_port}"
+        )
         process = subprocess.Popen(
             command,
             start_new_session=True,  # to seperate from parent process group
