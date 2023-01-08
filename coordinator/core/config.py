@@ -15,6 +15,7 @@ SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = os.environ.get("SLACK_APP_TOKEN")
 SLACK_COMMAND_CHANNEL = os.environ.get("SLACK_COMMAND_CHANNEL")
 SLACK_REPORT_CHANNEL = os.environ.get("SLACK_REPORT_CHANNEL")
+GIT_REPO_BRANCH = os.environ.get("GIT_REPO_BRANCH") or "master"
 
 TEMP_PATH = os.path.expanduser("~") + "/.tinycell_test-coordinator"
 
@@ -22,7 +23,6 @@ TEMP_PATH = os.path.expanduser("~") + "/.tinycell_test-coordinator"
 GIT_REMOTE_LINK = (
     os.environ.get("TEST_PROCESS_REPO") or "git@github.com:sixfab/tinycell_test-process.git"
 )
-GIT_REPO_BRANCH = "master"
 GIT_REPO_PATH = f"{TEMP_PATH}/test-process"
 
 EXECUTABLE_PATH = f"{TEMP_PATH}/test-process/testprocess"
