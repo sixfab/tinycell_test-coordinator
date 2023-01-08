@@ -7,7 +7,7 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from .config import config
 from .yamlio import load_yaml
 from .testrequest import check_request
-from .git import update_repo, switch_desired_branch
+from .git import update_repo, switch_desired_branch, fetch_repo
 from .config import device_list, test_process_list
 
 logger = config["logger"]
@@ -64,6 +64,19 @@ def message_test_process(message, say):
             f"*********************************\n\n"
         )
     say(text=response)
+
+
+@app.message("fetch repo")
+def message_fetch_repo(message, say):
+    """Message fetch repo handler"""
+    try:
+        fetch_repo()
+    except Exception as error:
+        logger(f"Error: {error}")
+        say(text=f"Error: {error}")
+    else:
+        logger.info("Fetched all changes from test_process repo succesfully")
+        say(text="Info: Fetched all changes from test_process repo succesfully")
 
 
 @app.message("update branch to")

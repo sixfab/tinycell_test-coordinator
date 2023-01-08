@@ -20,10 +20,9 @@ TEMP_PATH = os.path.expanduser("~") + "/.tinycell_test-coordinator"
 
 # GIT CONFIGS
 GIT_REMOTE_LINK = (
-    os.environ.get("TEST_PROCESS_REPO") \
-        or "git@github.com:sixfab/tinycell_test-process.git"
+    os.environ.get("TEST_PROCESS_REPO") or "git@github.com:sixfab/tinycell_test-process.git"
 )
-GIT_REPO_BRANCH = "dev"
+GIT_REPO_BRANCH = "master"
 GIT_REPO_PATH = f"{TEMP_PATH}/test-process"
 
 EXECUTABLE_PATH = f"{TEMP_PATH}/test-process/testprocess"

@@ -3,7 +3,7 @@ import threading
 
 from core.config import config
 from core.slack import get_slack_socket_mode_handler
-from core.git import clone_repo, update_repo
+from core.git import init_git_repo
 from core.serialport import update_device_list
 from core.testrequest import tidy_up_process_list, manage_test_processes, reload_test_processes
 
@@ -17,11 +17,8 @@ slack_handler = get_slack_socket_mode_handler()
 def source_manager():
     """Thread function for managing git source and device farm."""
     logger.info("Source manager started.")
-    # git repo
-    clone_repo()
-    update_repo()
 
-    # test process
+    init_git_repo()
     reload_test_processes()
 
     while True:
