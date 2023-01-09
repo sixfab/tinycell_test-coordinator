@@ -7,7 +7,7 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from .config import config
 from .yamlio import load_yaml
 from .testrequest import check_request
-from .git import update_repo, switch_desired_branch
+from .git import update_repo, switch_desired_branch, fetch_repo
 from .config import device_list, test_process_list
 
 logger = config["logger"]
@@ -59,9 +59,25 @@ def message_test_process(message, say):
             f"End Time: {process.end_time}\n"
             f"Repeat: {process.repeat}\n"
             f"Interval: {process.interval}\n"
+            f"Start On: {process.start_on}\n"
+            f"Run Until: {process.run_until}\n"
             f"*********************************\n\n"
         )
     say(text=response)
+
+
+@app.message("fetch repo")
+def message_fetch_repo(message, say):
+    """Message fetch repo handler"""
+    try:
+        fetch_repo()
+    except Exception as error:
+        logger(f"Error: {error}")
+        say(text=f"Error: {error}")
+    else:
+        logger.info("Fetched all changes from test_process repo succesfully")
+        say(text="Info: Fetched all changes from test_process repo succesfully")
+
 
 @app.message("update branch to")
 def message_update_branch(message, say):
@@ -75,6 +91,7 @@ def message_update_branch(message, say):
     else:
         logger.info("test_process branch updated succesfully to " + branch_name)
         say(text="Info: test_process branch updated succesfully to " + branch_name)
+
 
 @app.message("update repo")
 def message_update_repo(message, say):
@@ -95,29 +112,32 @@ def handle_message_events(body):
     """Handle file shared event"""
     url = body["event"]["files"][0]["url_private"]
 
-    response = requests.get(
-        url, headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}"}, timeout=10
-    )
+    response = requests.get(url, headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}"}, timeout=30)
 
     if response.status_code == 200:
         logger.info("Yaml file downloaded successfully")
         yaml = load_yaml(response.text)
 
         try:
-            result = check_request(yaml)
-
+            request_list = yaml["requests"]
         except Exception as error:
-            logger.error(f"check_request -> {error}")
-            web_client.chat_postMessage(
-                channel=SLACK_COMMAND_CHANNEL, text=f"Error: {error}"
-            )
-
+            logger.error(f"Error: {error}")
+            web_client.chat_postMessage(channel=SLACK_COMMAND_CHANNEL, text=f"Error: {error}")
         else:
-            logger.info("Test request processed successfully")
-            web_client.chat_postMessage(
-                channel=SLACK_COMMAND_CHANNEL, text=f"Info: {result}"
-            )
-
+            for request in request_list:
+                print(request)
+                try:
+                    result = check_request(request)
+                except Exception as error:
+                    logger.error(f"Error: {error}")
+                    web_client.chat_postMessage(
+                        channel=SLACK_COMMAND_CHANNEL, text=f"Error: {error}"
+                    )
+                else:
+                    logger.info("Test request processed successfully")
+                    web_client.chat_postMessage(
+                        channel=SLACK_COMMAND_CHANNEL, text=f"Info: {result}"
+                    )
     else:
         raise Exception("Failed to download yaml file from slack!")
 

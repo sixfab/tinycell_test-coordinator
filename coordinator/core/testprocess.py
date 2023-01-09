@@ -18,8 +18,11 @@ class TestProcess:
         """Class for holding test process status"""
 
         IDLE: str = "idle"
+        WAITING: str = "waiting"
         RUNNING: str = "running"
         FINISHED: str = "finished"
+        REPEATING: str = "repeating"
+        COMPLETED: str = "completed"
         TERMINATED: str = "terminated"
         KILLED: str = "killed"
 
@@ -29,8 +32,10 @@ class TestProcess:
         device_name: str,
         device_port: str,
         script_name: str,
-        repeat: int,
-        interval: int,
+        repeat: int = 0,
+        interval: int = 0,
+        start_on: int = 0,
+        run_until: int = 0,
         status: str = Status.IDLE,
         process_id: int = None,
         start_time: float = 0,
@@ -42,6 +47,8 @@ class TestProcess:
         self.script_name = script_name
         self.repeat = repeat
         self.interval = interval
+        self.start_on = start_on
+        self.run_until = run_until
         self.status = status
         self.process_id = process_id
         self.start_time = start_time
@@ -65,20 +72,19 @@ class TestProcess:
 
         def on_exit(process) -> None:
             """After a test process ends, update the status of the test process."""
-            logger.info(
-                f"{self.process_id} on {self.device_port} is waiting for exit."
-            )
+            logger.info(f"{self.process_id} on {self.device_port} is waiting for exit.")
             process.wait()
             if self.status == self.Status.RUNNING:
                 self.status = self.Status.FINISHED
                 self.end_time = time.time()
                 logger.info(f"{self.process_id} is finished.")
             else:
-                logger.info(
-                    f"{self.process_id} is {self.status} by another request."
-                )
+                logger.info(f"{self.process_id} is {self.status} by another request.")
 
-        command = f"../venv/bin/python {EXECUTABLE_PATH}/run.py -t {self.script_name} -p {self.device_port}"
+        command = (
+            f"../venv/bin/python {EXECUTABLE_PATH}/run.py -t {self.script_name}"
+            f" -p {self.device_port}"
+        )
         process = subprocess.Popen(
             command,
             start_new_session=True,  # to seperate from parent process group

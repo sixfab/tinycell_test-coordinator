@@ -48,11 +48,11 @@ A `.env` file is neccessary to run the program. It should be placed in the same 
 SLACK_BOT_TOKEN=xoxb-xxxxxxxxxxxx-xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxx
 SLACK_APP_TOKEN=xapp-x-xxxxxxxxxxxx-xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxx
 
-TEST_PROCESS_REPO=https://github.com/sixfab/tinycell_test-process.git
-TEST_PROCESS_BRANCH=dev
+GIT_REPO_BRANCH=dev
 
 SLACK_COMMAND_CHANNEL="#tinycell-command"
 SLACK_REPORT_CHANNEL="#tinycell-reports"
+
 ```
 
 ## Manual Installation
